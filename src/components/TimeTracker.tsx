@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, LogIn, LogOut, Timer, Settings } from 'lucide-react';
-import { toast } from 'sonner';
+import { premiumToast } from '@/lib/toast';
 import { ThemeToggle } from './ThemeToggle';
 import { ResetButton } from './ResetButton';
 import { EditableTimeLog } from './EditableTimeLog';
@@ -37,7 +37,7 @@ const TimeTracker = () => {
     
     // Validate data integrity
     if (parsedLogs.length > 0 && !dataIntegrity.validateIntegrity(parsedLogs)) {
-      toast.error("Data Integrity Warning: Some data may have been corrupted. Please verify your time logs.");
+      premiumToast.dataIntegrityWarning();
     }
     
     setLogs(parsedLogs);
@@ -45,7 +45,7 @@ const TimeTracker = () => {
     // Find today's log
     const todaysEntry = parsedLogs.find((log: TimeLog) => log.date === today);
     setTodayLog(todaysEntry || null);
-  }, [today, toast]);
+  }, [today]);
 
   // Save logs to localStorage whenever logs change with security validation
   useEffect(() => {
@@ -55,9 +55,9 @@ const TimeTracker = () => {
     if (success) {
       dataIntegrity.updateChecksum(logs);
     } else {
-      toast.error("Save Error: Failed to save time logs. Please try again.");
+      premiumToast.saveError();
     }
-  }, [logs, toast]);
+  }, [logs]);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
@@ -105,7 +105,7 @@ const TimeTracker = () => {
     setLogs(updatedLogs);
     setTodayLog(newLog);
     
-    toast.success(`Login time recorded: ${timeString}`);
+    premiumToast.loginSuccess(timeString);
   };
 
   const handleLogout = () => {
@@ -128,7 +128,7 @@ const TimeTracker = () => {
     setLogs(updatedLogs);
     setTodayLog(updatedLog);
     
-    toast.success(`Logout time recorded: ${timeString}`);
+    premiumToast.logoutSuccess(timeString);
   };
 
   const handleReset = () => {
@@ -153,35 +153,41 @@ const TimeTracker = () => {
   const isCompleted = todayLog && todayLog.logoutTime;
 
   return (
-    <div className="min-h-screen bg-gradient-header p-2 sm:p-4">
-      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
+    <div className="min-h-screen bg-gradient-header bg-pattern p-2 sm:p-4">
+      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="text-center py-4 sm:py-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <Timer className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-              <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Time Tracker
-              </h1>
+        <div className="text-center py-6 sm:py-12">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-8">
+            <div className="flex items-center gap-4 animate-float">
+              <div className="relative">
+                <Timer className="w-8 h-8 sm:w-10 sm:h-10 text-gradient animate-pulse-slow" />
+                <div className="absolute inset-0 w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/20 rounded-full animate-ping"></div>
+              </div>
+                      <h1 className="text-2xl sm:text-4xl font-bold text-gradient">
+          Log Desk
+        </h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <ThemeToggle />
               {logs.length > 0 && <ResetButton onReset={handleReset} />}
             </div>
           </div>
-          <p className="text-muted-foreground text-sm sm:text-lg">
-            Track your daily work hours with precision
-          </p>
+                  <p className="text-muted-foreground text-sm sm:text-lg font-medium">
+          Track your daily work hours with precision and style
+        </p>
         </div>
 
         {/* Current Status Card */}
-        <Card className="shadow-large">
-          <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-2">
-              <Clock className="w-5 h-5" />
+        <Card className="card-premium animate-float">
+          <CardHeader className="text-center pb-6">
+            <CardTitle className="flex items-center justify-center gap-3 text-2xl">
+              <div className="relative">
+                <Clock className="w-6 h-6 text-gradient" />
+                <div className="absolute inset-0 w-6 h-6 bg-blue-500/20 rounded-full animate-ping"></div>
+              </div>
               Today's Status
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-lg font-medium text-muted-foreground">
               {currentTime.toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -190,67 +196,67 @@ const TimeTracker = () => {
               })}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-8">
             {/* Current Time Display */}
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-mono font-bold text-primary">
-                {formatTime(currentTime)}
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">Current Time</p>
+                              <div className="text-4xl sm:text-5xl font-mono font-bold text-gradient animate-glow tracking-wider">
+                  {formatTime(currentTime)}
+                </div>
+                              <p className="text-base text-muted-foreground mt-3 font-medium">Current Time</p>
             </div>
 
             {/* Status Information */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="text-center p-4 rounded-lg bg-accent/50">
-                <p className="text-sm text-muted-foreground">Login Time</p>
-                <p className="font-semibold">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/50 border border-slate-200/50 backdrop-blur-sm">
+                <p className="text-sm text-muted-foreground font-medium mb-2">Login Time</p>
+                <p className="font-bold text-base text-slate-700">
                   {todayLog?.loginTime || '—'}
                 </p>
               </div>
-              <div className="text-center p-4 rounded-lg bg-accent/50">
-                <p className="text-sm text-muted-foreground">Expected Logout</p>
-                <p className="font-semibold">
+              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/50 border border-slate-200/50 backdrop-blur-sm">
+                <p className="text-sm text-muted-foreground font-medium mb-2">Expected Logout</p>
+                <p className="font-bold text-base text-slate-700">
                   {todayLog ? getExpectedLogout(todayLog.loginTime) : '—'}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">(8h 30m shift)</p>
               </div>
-              <div className="text-center p-4 rounded-lg bg-accent/50">
-                <p className="text-sm text-muted-foreground">Status</p>
-                <Badge variant={isCompleted ? "secondary" : canLogout ? "default" : "outline"}>
+              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/50 border border-slate-200/50 backdrop-blur-sm">
+                <p className="text-sm text-muted-foreground font-medium mb-2">Status</p>
+                <div className={`badge-premium ${isCompleted ? "success" : canLogout ? "primary" : "secondary"}`}>
                   {isCompleted ? "Completed" : canLogout ? "Logged In" : "Not Started"}
-                </Badge>
+                </div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button
-                variant="login"
-                size="lg"
+            <div className="flex flex-col sm:flex-row justify-center gap-6">
+              <button
                 onClick={handleLogin}
                 disabled={!canLogin}
-                className="min-w-32 w-full sm:w-auto"
+                className={`btn-premium min-w-40 w-full sm:w-auto ${!canLogin ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <LogIn className="w-4 h-4" />
-                Login
-              </Button>
-              <Button
-                variant="logout"
-                size="lg"
+                <div className="flex items-center justify-center gap-3">
+                  <LogIn className="w-5 h-5" />
+                  <span>Login</span>
+                </div>
+              </button>
+              <button
                 onClick={handleLogout}
                 disabled={!canLogout}
-                className="min-w-32 w-full sm:w-auto"
+                className={`btn-success-premium min-w-40 w-full sm:w-auto ${!canLogout ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </Button>
+                <div className="flex items-center justify-center gap-3">
+                  <LogOut className="w-5 h-5" />
+                  <span>Logout</span>
+                </div>
+              </button>
             </div>
 
             {/* Today's Progress */}
             {todayLog && (
-              <div className="text-center p-4 rounded-lg bg-gradient-to-r from-accent/30 to-secondary/30">
-                <p className="text-sm text-muted-foreground mb-2">Today's Duration</p>
-                <p className="text-2xl font-bold text-primary">
+              <div className="text-center p-6 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100/50 border border-slate-200/50 backdrop-blur-sm">
+                <p className="text-sm text-muted-foreground mb-3 font-medium">Today's Duration</p>
+                <p className="text-2xl font-bold text-gradient-success">
                   {todayLog.duration || 'In Progress...'}
                 </p>
               </div>
@@ -259,24 +265,30 @@ const TimeTracker = () => {
         </Card>
 
         {/* Time Logs History */}
-        <Card className="shadow-large">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
+        <Card className="card-premium">
+          <CardHeader className="pb-6">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="relative">
+                <Settings className="w-6 h-6 text-gradient" />
+                <div className="absolute inset-0 w-6 h-6 bg-blue-500/20 rounded-full animate-ping"></div>
+              </div>
               Time Logs History
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base font-medium">
               Your complete work time records - Click on any entry to edit
             </CardDescription>
           </CardHeader>
           <CardContent>
             {logs.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Timer className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No time logs yet. Start by logging in!</p>
+              <div className="text-center py-12 text-muted-foreground">
+                <div className="relative inline-block mb-6">
+                  <Timer className="w-16 h-16 mx-auto opacity-50 animate-float" />
+                  <div className="absolute inset-0 w-16 h-16 bg-blue-500/10 rounded-full animate-ping"></div>
+                </div>
+                <p className="text-lg font-medium">No time logs yet. Start by logging in!</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {logs.map((log, index) => (
                   <EditableTimeLog
                     key={index}

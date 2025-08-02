@@ -1,6 +1,6 @@
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { premiumToast } from '@/lib/toast';
 
 interface ResetButtonProps {
   onReset: () => void;
@@ -14,19 +14,19 @@ export const ResetButton = ({ onReset }: ResetButtonProps) => {
     
     if (confirmed) {
       onReset();
-      toast.success("All time logs have been cleared successfully.");
+      premiumToast.dataReset();
     }
   };
 
   return (
-    <Button 
-      variant="outline" 
-      size="sm" 
-      className="text-destructive hover:text-destructive"
+    <button 
+      className="btn-destructive-premium text-sm px-4 py-2"
       onClick={handleReset}
     >
-      <Trash2 className="w-4 h-4 mr-2" />
-      Reset All Data
-    </Button>
+      <div className="flex items-center justify-center gap-2">
+        <Trash2 className="w-4 h-4" />
+        <span>Reset All Data</span>
+      </div>
+    </button>
   );
 };

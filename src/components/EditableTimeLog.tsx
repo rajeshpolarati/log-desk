@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Edit2, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
+import { premiumToast } from '@/lib/toast';
 import { sanitizeInput } from '@/lib/security';
 
 interface TimeLog {
@@ -56,18 +56,18 @@ export const EditableTimeLog = ({ log, index, onUpdate }: EditableTimeLogProps) 
     
     // Validate sanitized inputs
     if (!sanitizeInput.timeFormat(sanitizedLoginTime)) {
-      toast.error("Invalid Time Format: Please use format like '9:00 AM' or '5:30 PM'");
+      premiumToast.invalidTimeFormat();
       return;
     }
 
     if (sanitizedLogoutTime && !sanitizeInput.timeFormat(sanitizedLogoutTime)) {
-      toast.error("Invalid Time Format: Please use format like '9:00 AM' or '5:30 PM'");
+      premiumToast.invalidTimeFormat();
       return;
     }
     
     // Validate date integrity
     if (!sanitizeInput.dateInput(log.date)) {
-      toast.error("Invalid Date: Log date is invalid or outside acceptable range");
+      premiumToast.invalidDate();
       return;
     }
 
@@ -83,7 +83,7 @@ export const EditableTimeLog = ({ log, index, onUpdate }: EditableTimeLogProps) 
     onUpdate(index, updatedLog);
     setIsEditing(false);
     
-    toast.success("Log entry has been updated successfully.");
+    premiumToast.timeUpdated();
   };
 
   const handleCancel = () => {
@@ -94,100 +94,105 @@ export const EditableTimeLog = ({ log, index, onUpdate }: EditableTimeLogProps) 
 
   if (isEditing) {
     return (
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border bg-card hover:shadow-medium transition-all space-y-4 sm:space-y-0">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 rounded-xl border border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-gray-50/50 backdrop-blur-sm hover:shadow-medium transition-all space-y-4 sm:space-y-0">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 flex-1">
           <div className="text-center">
-            <p className="font-semibold">
-              {new Date(log.date).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
-              })}
-            </p>
-            <p className="text-xs text-muted-foreground">
+                      <p className="font-bold text-base text-slate-700">
+            {new Date(log.date).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric' 
+            })}
+          </p>
+            <p className="text-sm text-muted-foreground font-medium">
               {new Date(log.date).toLocaleDateString('en-US', { 
                 weekday: 'short' 
               })}
             </p>
           </div>
-          <div className="h-px sm:h-8 w-full sm:w-px bg-border"></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm flex-1">
+          <div className="h-px sm:h-8 w-full sm:w-px bg-gradient-to-b from-slate-200 to-gray-200"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm flex-1">
             <div>
-              <p className="text-muted-foreground mb-1">Login</p>
-              <Input
+              <p className="text-muted-foreground mb-2 font-medium">Login</p>
+              <input
                 value={editLoginTime}
                 onChange={(e) => setEditLoginTime(sanitizeInput.timeInput(e.target.value))}
                 placeholder="9:00 AM"
-                className="h-8"
+                className="input-premium w-full"
                 maxLength={8}
               />
             </div>
             <div>
-              <p className="text-muted-foreground mb-1">Logout</p>
-              <Input
+              <p className="text-muted-foreground mb-2 font-medium">Logout</p>
+              <input
                 value={editLogoutTime}
                 onChange={(e) => setEditLogoutTime(sanitizeInput.timeInput(e.target.value))}
                 placeholder="5:30 PM"
-                className="h-8"
+                className="input-premium w-full"
                 maxLength={8}
               />
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button size="sm" onClick={handleSave} className="h-8 w-8 p-0">
-            <Check className="w-4 h-4" />
-          </Button>
-          <Button size="sm" variant="outline" onClick={handleCancel} className="h-8 w-8 p-0">
-            <X className="w-4 h-4" />
-          </Button>
+        <div className="flex gap-3 items-center">
+          <button onClick={handleSave} className="btn-success-premium h-10 w-10 p-0 rounded-lg">
+            <div className="flex items-center justify-center w-full h-full">
+              <Check className="w-5 h-5" />
+            </div>
+          </button>
+          <button onClick={handleCancel} className="btn-destructive-premium h-10 w-10 p-0 rounded-lg">
+            <div className="flex items-center justify-center w-full h-full">
+              <X className="w-5 h-5" />
+            </div>
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border bg-card hover:shadow-medium transition-all group space-y-4 sm:space-y-0">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 rounded-xl border border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-gray-50/50 backdrop-blur-sm hover:shadow-medium transition-all group space-y-4 sm:space-y-0 hover:scale-[1.02]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 flex-1">
         <div className="text-center">
-          <p className="font-semibold">
+          <p className="font-bold text-base text-slate-700">
             {new Date(log.date).toLocaleDateString('en-US', { 
               month: 'short', 
               day: 'numeric' 
             })}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground font-medium">
             {new Date(log.date).toLocaleDateString('en-US', { 
               weekday: 'short' 
             })}
           </p>
         </div>
-        <div className="h-px sm:h-8 w-full sm:w-px bg-border"></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-sm flex-1">
+        <div className="h-px sm:h-8 w-full sm:w-px bg-gradient-to-b from-slate-200 to-gray-200"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 text-sm flex-1">
           <div>
-            <p className="text-muted-foreground">Login</p>
-            <p className="font-medium">{log.loginTime}</p>
+            <p className="text-muted-foreground font-medium mb-1">Login</p>
+            <p className="font-bold text-slate-700">{log.loginTime}</p>
           </div>
           <div>
-            <p className="text-muted-foreground">Logout</p>
-            <p className="font-medium">{log.logoutTime || 'In Progress'}</p>
+            <p className="text-muted-foreground font-medium mb-1">Logout</p>
+            <p className="font-bold text-slate-700">{log.logoutTime || 'In Progress'}</p>
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-6">
         <div className="text-right">
-          <p className="text-sm text-muted-foreground">Duration</p>
-          <p className="font-semibold text-primary">
+          <p className="text-sm text-muted-foreground font-medium">Duration</p>
+          <p className="font-bold text-base text-gradient-success">
             {log.duration || '—'}
           </p>
         </div>
-        <Button
-          size="sm"
-          variant="ghost"
+        <button
           onClick={() => setIsEditing(true)}
-          className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="h-10 w-10 p-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg bg-gradient-to-r from-slate-600 to-gray-600 text-white hover:scale-110"
+          style={{ boxShadow: 'var(--shadow-glow)' }}
         >
-          <Edit2 className="w-4 h-4" />
-        </Button>
+          <div className="flex items-center justify-center w-full h-full">
+            <Edit2 className="w-5 h-5" />
+          </div>
+        </button>
       </div>
     </div>
   );
